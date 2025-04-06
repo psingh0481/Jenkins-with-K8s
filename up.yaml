@@ -1,7 +1,31 @@
 ---
-- hosts: localhost
+- name: Deploy Jenkins on Kubernetes Cluster with Ngrok Ingress
+  hosts: localhost
+  connection: local
+  gather_facts: false
   tasks:
-  - name: "Install kubernetes python package"
-    pip:
-      name: kubernetes
-      state: present
+    - name: Ensure 'my-jenkins' namespace exists
+      kubernetes.core.k8s:
+        name: my-jenkins
+        api_version: v1
+        kind: Namespace
+        state: present
+
+    - name: Deploy Jenkins Deployment
+      kubernetes.core.k8s:
+        state: present
+        namespace: my-jenkins
+        src: jenkins-deployment.yaml
+
+    - name: Deploy Jenkins Service
+      kubernetes.core.k8s:
+        state: present
+        namespace: my-jenkins
+        src: jenkins-service.yaml
+
+    # Optional: Set up ngrok ingress
+    - name: Deploy ngrok Ingress
+      kubernetes.core.k8s:
+        state: present
+        namespace: my-jenkins
+        src: jenkins-ingress.yaml
